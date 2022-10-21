@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const {customers, } = require('../controllers/hotel.controllers')
+const { newCustomer, findCustomer } = require('../controllers/hotel.controllers')
 
-router.get('/customers', )
-router.get('/bookings', )
-router.post('/customer', )
-router.post('/book', )
+router.get('/customer/:phone', findCustomer)
+router.post('/customer/new', newCustomer)
+//router.get('/bookings', viewBookings)
+//router.post('/book', )
 
 module.exports = router
