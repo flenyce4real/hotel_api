@@ -22,4 +22,25 @@ const createCustomer = (name, phone, email) => {
    })
 }
 
-module.exports = { createCustomer, checkCustomer }
+const createBooking = (customer_id, room_id, stay_length) => {
+    return new Promise((resolve, reject) => {
+        connection.query(`INSERT INTO bookings(booking_id, customer_id, room_id, stay_length)
+        VALUES('${uuidv4()}','${customer_id}','${room_id}','${stay_length}')`,
+        (err, results, fields) =>  {
+            if (err) reject(err)
+            resolve(results)
+        })
+    })
+}
+
+const fetchBookings = () => {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT * FROM bookings`,
+            (err, results, fields) => {
+            if (err) reject(err)
+            resolve(results)
+        })
+    })
+}
+
+module.exports = { createCustomer, checkCustomer, fetchBookings, createBooking }

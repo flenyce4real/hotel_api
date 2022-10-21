@@ -1,5 +1,5 @@
 const Joi = require('joi')
-const { checkCustomer, createCustomer } = require('../models/query')
+const { checkCustomer, createCustomer, createBooking, fetchBookings } = require('../models/query')
 
 const findCustomer = (req, res) => {
     const schema = Joi.object({
@@ -9,15 +9,18 @@ const findCustomer = (req, res) => {
     try{
         const { error, value } = schema.validate(req.params)
         if (error != undefined) throw new Error(error.details[0].message)
-
         const { phone } = req.params
         const email = phone
         checkCustomer(email, phone)
         .then(customerResult => {
-            res.status(200).json({
-                status:true,
-                message: customerResult
-            })
+            if (customerResult.length < 1) {
+                throw new Error('Customer does not exist')
+            } else {
+                res.status(200).json({
+                    status:true,
+                    message: customerResult
+                })
+            }
         })
         .catch(error => {
             res.status(400).json({
@@ -41,7 +44,7 @@ const newCustomer = (req, res) => {
         email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required()
     })
 
-    try{
+    try {
         const { error, value } = schema.validate(req.body)
         if (error != undefined) throw new Error(error.details[0].message)
       
@@ -65,7 +68,7 @@ const newCustomer = (req, res) => {
             })
         })
 
-    }catch(error) {
+    } catch(error) {
         res.status(400).json({
             status:false,
             message: error.message
@@ -73,4 +76,45 @@ const newCustomer = (req, res) => {
     }
 }
 
-module.exports = { newCustomer, findCustomer }
+const viewBookings = (req, res) => {
+    try {
+        fetchBookings()
+        .then(checkResult => {
+            if (checkResult.length < 1) {
+                throw new Error('No booking record found')
+            } else {
+                res.status(201).json({
+                    status:true,
+                    message: checkResult
+                })
+            }
+        })
+        .catch(error => {
+            res.status(400).json({
+                status:false,
+                message: error.message
+            })
+        })
+
+    } catch (error) {
+        res.status(400).json({
+            status:false,
+            message: error.message
+        })
+    }
+}
+
+const newBookings = (req, res) => {
+
+
+    try {
+        
+    } catch (error) {
+        res.status(400).json({
+            status:false,
+            message: error.message
+        })
+    }
+}
+
+module.exports = { newCustomer, findCustomer, viewBookings, newBookings }
