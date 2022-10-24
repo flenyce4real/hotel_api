@@ -1,5 +1,5 @@
 const Joi = require('joi')
-const { checkCustomer, createCustomer, createBooking, fetchBookings, createRoom, checkRoom, checkRoomStatus } = require('../models/query')
+const { checkCustomer, createCustomer, createBooking, fetchBookings, createRoom, checkRoom, checkRoomStatus, refno2roomid } = require('../models/query')
 
 const findCustomer = (req, res) => {
     const schema = Joi.object({
@@ -119,12 +119,12 @@ const newBookings = (req, res) => {
         const { customer_id, refno, stay_length, amount_paid } = req.body
 
         refno2roomid(refno)
-        .then(getRefno => {
-            if (getRefno.length <= 0) {
+        .then(getroomid => {
+            if (getroomid.length <= 0) {
                 throw new Error(`Invalid Refno supplied`)
             }
-            const room_id = getRefno[0].room_id
-            return createCustomer(customer_id, room_id, stay_length) 
+            const room_id = getroomid[0].room_id
+            return createBooking(customer_id, room_id, stay_length, amount_paid) 
         })
         .then(customerResult => {
             res.status(201).json({
@@ -225,4 +225,39 @@ const roomStatus = (req, res) => {
     }
 }
 
-module.exports = { newCustomer, findCustomer, viewBookings, newBookings, addRoom, checkRoom, roomStatus }
+const getRoomId = (req, res) => {
+    const schema = Joi.object({
+        refno: Joi.string().min(8).required()
+    })
+    
+    try{
+        const { error, value } = schema.validate(req.params)
+        if (error != undefined) throw new Error(error.details[0].message)
+        const { refno } = req.params
+        refno2roomid(refno)
+        .then(idresult => {
+            if (idresult.length < 1) {
+                throw new Error('Refno does not exist')
+            } else {
+                res.status(200).json({
+                    status:true,
+                    message: idresult
+                })
+            }
+        })
+        .catch(error => {
+            res.status(400).json({
+                status:false,
+                message: error.message
+            })
+        })
+
+    } catch(e){
+        res.status(404).json({
+            status:false,
+            message: e.message
+        })
+    }
+}
+
+module.exports = { newCustomer, findCustomer, viewBookings, newBookings, addRoom, roomStatus, getRoomId }

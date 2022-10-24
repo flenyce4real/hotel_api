@@ -22,10 +22,10 @@ const createCustomer = (name, phone, email) => {
    })
 }
 
-const createBooking = (customer_id, room_id, stay_length) => {
+const createBooking = (customer_id, room_id, stay_length, amount_paid) => {
     return new Promise((resolve, reject) => {
-        connection.query(`INSERT INTO bookings(booking_id, customer_id, room_id, stay_length)
-        VALUES('${uuidv4()}','${customer_id}','${room_id}','${stay_length}')`,
+        connection.query(`INSERT INTO bookings(booking_id, customer_id, room_id, stay_length, amount_paid)
+        VALUES('${uuidv4()}', '${customer_id}', '${room_id}', '${stay_length}', '${amount_paid}')`,
         (err, results, fields) =>  {
             if (err) reject(err)
             resolve(results)
@@ -45,7 +45,7 @@ const fetchBookings = () => {
 
 const refno2roomid = (refno) => {
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT room_id FROM rooms where refno = ${refno}`,
+        connection.query(`SELECT room_id FROM rooms where refno = '${refno}'`,
             (err, results, fields) => {
             if (err) reject(err)
             resolve(results)
